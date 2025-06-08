@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>肉制品知识测试</title>
+    <style>
+        body {
+            font-family: "微软雅黑", sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .question {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+        .option {
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .correct {
+            color: green;
+        }
+        .wrong {
+            color: red;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>肉制品知识测试</h1>
+        <div style="margin-bottom:16px;">
+            <button onclick="startOrdered()">顺序练习</button>
+            <button onclick="startRandom()">随机练习</button>
+            <button onclick="startWrongBook()">错题复习</button>
+        </div>
+        <div id="quiz-area"></div>
+        <div id="result"></div>
+        <div id="score" style="font-weight: bold; margin-top: 10px;"></div>
+        <div id="wrongbook-area" style="margin-top:30px;"></div>
+    </div>
+    <script>
+// 题库数据结构示例（部分，后续将全部补全）
+const questions = [
+    // 单选题
+    {
+        type: 'single',
+        question: '1.【单选题】根据肉类制品的产品特征和加工工艺，可以将肉制品分为（        ）大类。',
+        options: ['A.5', 'B.8', 'C.10', 'D.12'],
+        answer: ['C'],
+        explanation: '根据肉类制品的产品特征和加工工艺，通常将肉制品分为10大类。'
+    },
+    {
+        type: 'single',
+        question: '2.【单选题】色拉米肠是典型的（        ）。',
+        options: ['A.中式香肠', 'B.发酵香肠', 'C.熏煮香肠', 'D.生鲜肠'],
+        answer: ['B'],
+        explanation: '色拉米肠属于发酵香肠。'
+    },
+    {
+        type: 'single',
+        question: '4.【单选题】生产金华火腿最好选择（        ）。',
+        options: ['A.陆川猪', 'B.两头乌猪', 'C.荣昌猪', 'D.八眉猪'],
+        answer: ['B'],
+        explanation: '金华火腿以两头乌猪为最佳原料。'
+    },
+    {
+        type: 'single',
+        question: '5.【单选题】我国黄牛的产肉性能以五大良种黄牛品种为最高。特别是（        ），在中等营养水平条件下，其某些屠宰指标如屠宰率、净肉率已接近或超过国外著名的肉牛品种。',
+        options: ['A.南阳牛', 'B.鲁西牛', 'C.延边牛', 'D.秦川牛'],
+        answer: ['D'],
+        explanation: '秦川牛在五大良种黄牛中产肉性能突出。'
+    },
+    {
+        type: 'single',
+        question: '7.【单选题】（         ）适合做炸鸡。',
+        options: ['A.惠阳胡须鸡', 'B.清远麻鸡', 'C.白羽肉鸡', 'D.杏花鸡'],
+        answer: ['C'],
+        explanation: '白羽肉鸡适合做炸鸡。'
+    },
+    {
+        type: 'single',
+        question: '9.【单选题】尸僵开始的时间很大程度上取决于（        ）。',
+        options: ['A.动物种类', 'B.宰前状态', 'C.温度', 'D.宰杀方法'],
+        answer: ['C'],
+        explanation: '温度对尸僵开始时间影响最大。'
+    },
+    {
+        type: 'single',
+        question: '11.【单选题】肉贮藏时，为了防止微生物繁殖，应把Aw值降到（    ）以下。',
+        options: ['A.0.5', 'B.0.6', 'C.0.7', 'D.0.8'],
+        answer: ['B'],
+        explanation: 'Aw值降到0.6以下可有效抑制微生物繁殖。'
+    },
+    {
+        type: 'single',
+        question: '12.【单选题】当食盐浓度大约在（       ）时，肉的保水性达到最强。',
+        options: ['A.2.6％～3.8％', 'B.3.6％～4.8％', 'C.4.6％～5.8％', 'D.5.6％～6.8％'],
+        answer: ['C'],
+        explanation: '食盐浓度4.6%~5.8%时肉的保水性最强。'
+    },
+    {
+        type: 'single',
+        question: '1.【单选题】生产肉罐头时原料肉预煮一般煮至（      ）成熟。',
+        options: ['A.三', 'B.五', 'C.八', 'D.十'],
+        answer: ['C'],
+        explanation: '肉罐头原料肉预煮一般煮至八成熟。'
+    },
+    {
+        type: 'single',
+        question: '2.【单选题】干肉制品生产最理想的干燥方法是（      ）。',
+        options: ['A.常压干燥', 'B.微波干燥', 'C.冻结升华干燥', 'D.真空干燥'],
+        answer: ['C'],
+        explanation: '冻结升华干燥（冻干）是最理想的干燥方法。'
+    },
+    {
+        type: 'single',
+        question: '4.【单选题】红烧扣肉罐头生产时油炸的主要目的是（      ）。',
+        options: ['A.熟制', 'B.赋予制品香味', 'C.上色', 'D.防止肉块黏结'],
+        answer: ['C'],
+        explanation: '油炸主要目的是上色。'
+    },
+    {
+        type: 'single',
+        question: '5.【单选题】脱纤维蛋白血或加抗凝剂的血，存放在奶罐型的容器中，用（      ）容器最为理想。',
+        options: ['A.塑料', 'B.圆筒形', 'C.箱形', 'D.不锈钢'],
+        answer: ['D'],
+        explanation: '不锈钢容器最为理想。'
+    },
+    {
+        type: 'single',
+        question: '6.【单选题】为消除骨粉中的腥臊味，研磨前也可加入适量（      ）。',
+        options: ['A.姜粉', 'B.胡椒粉', 'C.料酒', 'D.环状糊精'],
+        answer: ['D'],
+        explanation: '环状糊精可消除腥臊味。'
+    },
+    {
+        type: 'single',
+        question: '8.【单选题】在加工肠衣时要特别注意保护（      ），使其不受损失。',
+        options: ['A.黏膜层', 'B.黏膜下层', 'C.肌肉层', 'D.浆膜层'],
+        answer: ['B'],
+        explanation: '肠衣加工要保护黏膜下层。'
+    },
+    {
+        type: 'single',
+        question: '9.【单选题】油脂的精炼时中和与洗涤的主要目的是（      ）。',
+        options: ['A.除去游离脂肪酸', 'B.除去水分', 'C.脱臭', 'D.脱色'],
+        answer: ['A'],
+        explanation: '中和与洗涤主要是除去游离脂肪酸。'
+    },
+    {
+        type: 'single',
+        question: '1.【单选题】（      ）解冻法会使冷冻肉解冻后重量增加。',
+        options: ['A.空气', 'B.蒸汽', 'C.微波', 'D.真空'],
+        answer: ['B'],
+        explanation: '蒸汽解冻法会使冷冻肉解冻后重量增加。'
+    },
+    {
+        type: 'single',
+        question: '3.【单选题】（      ）对亚硝酸盐有消色作用，使用时应加以注意。',
+        options: ['A.八角', 'B.花椒', 'C.肉蔻', 'D.丁香'],
+        answer: ['D'],
+        explanation: '丁香对亚硝酸盐有消色作用。'
+    },
+    {
+        type: 'single',
+        question: '4.【单选题】西式灌肠制品，大多使用（        ）作为调味香料而使产品具有香辣鲜美的风味特点。',
+        options: ['A.辣椒', 'B.花椒', 'C.胡椒', 'D.生姜'],
+        answer: ['C'],
+        explanation: '西式灌肠多用胡椒调味。'
+    },
+    {
+        type: 'single',
+        question: '6.【单选题】肉制品加工使用最普遍的增稠剂是（          ）。',
+        options: ['A.羧甲基纤维素钠', 'B.明胶', 'C.淀粉', 'D.黄原胶'],
+        answer: ['C'],
+        explanation: '淀粉是最普遍的增稠剂。'
+    },
+    {
+        type: 'single',
+        question: '8.【单选题】中国传统三大火腿通常采用的腌制方法是（        ）。',
+        options: ['A.干腌法', 'B.湿腌法', 'C.混合腌法', 'D.盐水注射腌制'],
+        answer: ['A'],
+        explanation: '三大火腿采用干腌法。'
+    },
+    {
+        type: 'single',
+        question: '10.【单选题】（        ）是快速腌制法。',
+        options: ['A.干腌法', 'B.湿腌法', 'C.混合腌法', 'D.盐水注射腌制'],
+        answer: ['D'],
+        explanation: '盐水注射腌制是快速腌制法。'
+    },
+    {
+        type: 'single',
+        question: '12.【单选题】在正常气温条件下,金华火腿在腌制过程中共上盐并翻倒（       ）次。',
+        options: ['A.5', 'B.6', 'C.7', 'D.8'],
+        answer: ['C'],
+        explanation: '金华火腿腌制共上盐并翻倒7次。'
+    },
+    {
+        type: 'single',
+        question: '14.【单选题】金华火腿特有的颜色和芳香气味是在（      ）阶段形成的。',
+        options: ['A.腌制', 'B.洗晒', 'C.整形', 'D.发酵'],
+        answer: ['D'],
+        explanation: '金华火腿的颜色和芳香气味在发酵阶段形成。'
+    },
+    {
+        type: 'single',
+        question: '15.【单选题】去骨火腿用（      ）将整形后的肉块卷紧，包裹成圆筒状后用绳扎紧，也可用模具整形压紧。',
+        options: ['A.塑料', 'B.丝绸', 'C.棉布', 'D.化纤布'],
+        answer: ['C'],
+        explanation: '去骨火腿用棉布卷紧。'
+    },
+    {
+        type: 'single',
+        question: '17.【单选题】去骨火腿熏制一般采用（      ）。',
+        options: ['A.冷熏法', 'B.中温法', 'C.高温法', 'D.焙熏法'],
+        answer: ['B'],
+        explanation: '去骨火腿熏制一般采用中温法。'
+    },
+    {
+        type: 'single',
+        question: '1.【单选题】干肉制品生产常用的干燥方法是（      ）。',
+        options: ['A.常压干燥', 'B.微波干燥', 'C.冻结升华干燥', 'D.真空干燥'],
+        answer: ['A'],
+        explanation: '常压干燥为常用方法。'
+    },
+    {
+        type: 'single',
+        question: '3.【单选题】（      ）是福建肉松特有的操作工序。',
+        options: ['A.煮制', 'B.撕松', 'C.炒松', 'D.油酥'],
+        answer: ['D'],
+        explanation: '油酥是福建肉松特有工序。'
+    },
+    {
+        type: 'single',
+        question: '5.【单选题】肉干生产采用新工艺时，为了使产品入味一般采用的工艺操作为（      ）。',
+        options: ['A.煮制', 'B.腌制', 'C.脱水', 'D.切条'],
+        answer: ['B'],
+        explanation: '腌制有助于入味。'
+    },
+    {
+        type: 'single',
+        question: '6.【单选题】肉脯的传统加工工艺生产时冷冻的主要目的是便于（      ）。',
+        options: ['A.切片', 'B.腌制', 'C.烘烤', 'D.摊筛'],
+        answer: ['A'],
+        explanation: '冷冻便于切片。'
+    },
+    {
+        type: 'single',
+        question: '7.【单选题】烧鸡生产油炸时植物油的温度一般控制在（      ）℃。',
+        options: ['A. 160~180', 'B. 180~200', 'C. 200~220', 'D. 220~240'],
+        answer: ['A'],
+        explanation: '烧鸡油炸温度一般为160~180℃。'
+    },
+    {
+        type: 'single',
+        question: '8.【单选题】（      ）解冻法会使冷冻肉解冻后重量增加。',
+        options: ['A.空气', 'B.蒸汽', 'C.微波', 'D.真空'],
+        answer: ['B'],
+        explanation: '蒸汽解冻法会使冷冻肉解冻后重量增加。'
+    },
+    {
+        type: 'single',
+        question: '10.【单选题】熏烤肉制品烟熏时产生的对人体有害的烟气成分是（      ）。',
+        options: ['A.酚类', 'B.烃类', 'C.有机酸', 'D.羰基化合物'],
+        answer: ['B'],
+        explanation: '烃类为有害烟气成分。'
+    },
+    {
+        type: 'single',
+        question: '11.【单选题】（      ）可将烟气中的致癌成分净化掉，目前在国外已广泛使用，代表烟熏技术的发展方向。',
+        options: ['A.冷熏法', 'B.中温法', 'C.高温法', 'D.液熏法'],
+        answer: ['D'],
+        explanation: '液熏法可净化致癌成分。'
+    },
+    {
+        type: 'single',
+        question: '12.【单选题】干制的香肠和带骨火腿通常采用的熏制方法为（      ）。',
+        options: ['A.冷熏法', 'B.中温法', 'C.高温法', 'D.焙熏法'],
+        answer: ['A'],
+        explanation: '干制香肠和带骨火腿多用冷熏法。'
+    },
+    {
+        type: 'single',
+        question: '13.【单选题】一般灌肠产品采用的熏制方法为（      ）。',
+        options: ['A.冷熏法', 'B.中温法', 'C.高温法', 'D.焙熏法'],
+        answer: ['C'],
+        explanation: '一般灌肠产品采用高温法。'
+    },
+    {
+        type: 'single',
+        question: '14.【单选题】肉制品油炸定型一般温度设定170±3℃，时间设定为（      ）s，个头大的产品60-120s。',
+        options: ['A.5-10', 'B.10-15', 'C.15-20', 'D.20-50'],
+        answer: ['D'],
+        explanation: '油炸定型时间一般为20-50秒。'
+    },
+    // 多选题
+    {
+        type: 'multi',
+        question: '15.【多选题】中式肉制品包括（      ）、其他肉制品五大类。',
+        options: ['A.腌腊制品', 'B.酱卤制品', 'C.熏烧烤制品', 'D.干制品'],
+        answer: ['A','B','C','D'],
+        explanation: '中式肉制品包括腌腊、酱卤、熏烧烤、干制品等。'
+    },
+    {
+        type: 'multi',
+        question: '17.【多选题】瘦肉型猪传统上我国主要用于（        ）的加工。',
+        options: ['A.灌肠', 'B.腌肉', 'C.火腿', 'D.酱卤制品'],
+        answer: ['B','C'],
+        explanation: '瘦肉型猪主要用于腌肉和火腿的加工。'
+    },
+    {
+        type: 'multi',
+        question: '20.【多选题】畜禽宰前进行充分休息的目的（         ）。',
+        options: ['A.消除应激反应', 'B.调节体温', 'C.有利于放血', 'D.促进粪便排泄'],
+        answer: ['A','C'],
+        explanation: '充分休息可消除应激反应，有利于放血。'
+    },
+    {
+        type: 'multi',
+        question: '22.【多选题】畜禽宰前断食但供给充足饮水的目的（         ）。',
+        options: ['A.使畜禽进行正常的生理机能活动', 'B.调节体温', 'C.以便放血完全', 'D.促进粪便排泄'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '25.【多选题】畜禽分割的目的是（          ）。',
+        options: ['A.满足消费者的需求', 'B.提高企业的利润', 'C.有利于进一步加工', 'D.提高肉品质量'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '27.【多选题】影响尸僵开始和持续时间的因素有（         ）。',
+        options: ['A.动物种类', 'B.宰前状态', 'C.温度', 'D.宰杀方法'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '28.【多选题】畜禽宰后尸僵期的变化有（           ）。',
+        options: ['A. ATP从有到无', 'B. pH值降低', 'C. pH值升高', 'D. 保水性下降'],
+        answer: ['A','B','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '29.【多选题】达到最大尸僵期的肉（         ）。',
+        options: ['A. ATP消失怠尽', 'B. pH值最低', 'C.弹性最大', 'D.保水性最差'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '31.【多选题】成熟肉风味的增加，主要是（      ）变化所致。',
+        options: ['A.核甙类物质', 'B.氨基酸', 'C.糖原', 'D.有机酸'],
+        answer: ['A','B'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '33.【多选题】PSE肉的特点有（           ）。',
+        options: ['A.肉色淡', 'B.组织松软', 'C.持水性低', 'D.汁液易渗出'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '34.【多选题】下列关于DFD肉说法正确的是（        ）。',
+        options: ['A.肉色深', 'B.组织硬', 'C.表面干燥', 'D.一般多发生于牛肉'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '35.【多选题】胴体主要是由（        ）构成。',
+        options: ['A.肌肉组织', 'B.脂肪组织', 'C.结缔组织', 'D.神经组织'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '37.【多选题】（       ）与肉的风味有密切关系。',
+        options: ['A.核甘酸', 'B.嘌呤碱', 'C.游离氨基酸', 'D.胍化合物'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '39.【多选题】一定浓度的（        ）可降低肉的保水性。',
+        options: ['A.钾', 'B.钠', 'C.钙', 'D.锌'],
+        answer: ['C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '40.【多选题】影响肉颜色的因素有（       ）。',
+        options: ['A.动物种类', 'B.部位', 'C.肌红蛋白的含量', 'D.血红蛋白的含量'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '43.【多选题】影响保水性的主要因素有（       ）。',
+        options: ['A.蛋白质', 'B.pH值', 'C.金属离子', 'D.动物因素'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    // 判断题
+    {
+        type: 'judge',
+        question: '44.【判断题】畜禽屠宰要在宰前12~24h断食、停止给水。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '屠宰前应断食但要供水，题干说法错误。'
+    },
+    {
+        type: 'judge',
+        question: '51.【判断题】畜禽屠宰后处于成熟期的肉保水性最强。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '52.【判断题】热鲜肉的保水性比尸僵期的肉和成熟期的肉都高。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '53.【判断题】成熟期肉的保水性回升是部分性回升。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '11.【多选题】调理肉制品生产时加热的主要方式有（      ）等。',
+        options: ['A.蒸煮', 'B.烘烤', 'C.油炸', 'D.煎制'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '13.【多选题】调理肉制品未来发展趋势有（      ）等。',
+        options: ['A.健康化', 'B.智能化', 'C.定制化', 'D.绿色环保化'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '14.【多选题】肉类通过罐头加工可以（      ）。',
+        options: ['A.使产品能够较长期的保存', 'B.改善食品组织及风味', 'C.可防止内容物色泽、风味的变化', 'D.减轻罐头内壁腐蚀'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '16.【多选题】肉类罐头生产时灌汤的主要目的有（      ）。',
+        options: ['A.增进肉的风味', 'B.排除罐中空气，减小加热杀菌时的罐内压力', 'C.促进传热，提高杀菌效果', 'D.防止罐头在贮藏过程中的氧化和变形'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '17.【多选题】马口铁肉罐头生产时在排气前应进行预封，预封的主要作用有（      ）。',
+        options: ['A.使罐盖在排气或抽气过程中不致脱落', 'B.避免排气箱盖上蒸汽、冷凝水落入罐内', 'C.可防止罐头由排气箱送至封罐机时顶隙温度的降低', 'D.可防止罐头由排气箱送至封罐机时顶隙温度的升高'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '18.【多选题】肉罐头生产时排气的主要目的有（      ）。',
+        options: ['A.防止内容物氧化变质', 'B.减轻罐头高温杀菌时发生变形或损坏', 'C.抑制罐内残留的好气菌和霉菌的繁殖', 'D.防止或减轻贮藏过程中罐内壁的腐蚀'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '22.【多选题】肉罐头在杀菌冷却后必须进行检查，主要的检查项目包括（      ）等。',
+        options: ['A.外观检查', 'B.保温检查', 'C.真空度的测定', 'D.开罐检查'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '24.【多选题】午餐肉罐头生产时，必须要有腌制这一工序，其作用有（      ）。',
+        options: ['A.赋予制品鲜艳的红色', 'B.赋予制品较高的持水性', 'C.使制品组织紧密，富有弹性', 'D.防腐延长货架期'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '25.【多选题】在肉制品生产中，血红素可替代（      ）。',
+        options: ['A.亚硝酸盐', 'B.红曲米', 'C.胭脂红', 'D.苋菜红'],
+        answer: ['A','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '28.【多选题】超细鲜骨粉已经成功应用于（      ）等的生产。',
+        options: ['A.粮食制品', 'B.肉制品', 'C.奶制品', 'D.调味品'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '29.【多选题】关于"骨素"说法正确的是（      ）。',
+        options: ['A.最大限度地保持了原有动物新鲜骨肉天然的味道和香气', 'B.蛋白质含量高', 'C.易于为人体消化吸收', 'D.可在肉制品中广泛使用'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '30.【多选题】骨明胶生产时石灰水浸泡的主要作用有（      ）。',
+        options: ['A.缩短熬胶时间，降低生成骨胶的温度', 'B.除去原料骨的脂肪', 'C.除去原料骨的血', 'D.使骨组织疏松，从而有利于溶解有机物质和皂化脂肪。'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '32.【多选题】干法熔炼获得的动物油脂（      ）。',
+        options: ['A.酸价低', 'B.易澄清和分离', 'C.产品质量优于湿法的', 'D.有焦化现象'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '33.【多选题】湿法熔炼获得的动物油脂（      ）。',
+        options: ['A.异味少', 'B.色泽白', 'C.易造成水解', 'D.酸价低'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '19.【多选题】（      ）是决定储藏期和冻肉质量的重要因素。',
+        options: ['A.温度', 'B.相对湿度', 'C.空气流速', 'D.肉块大小'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '22.【多选题】辅料的作用有（      ）。',
+        options: ['A.各种辅料均能给制品添加某种特殊风味', 'B.抑制和矫正制品的不良气味', 'C.增进食欲', 'D.促进消化'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '24.【多选题】（      ）为芳香性香辛料。',
+        options: ['A.八角', 'B.花椒', 'C.肉蔻', 'D.桂皮'],
+        answer: ['A','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '25.【多选题】肉制品加工添加白糖可以起到（         ）等作用。',
+        options: ['A.具有改善产品风味', 'B.缓冲咸味', 'C.在腌肉和制馅加入一定量的糖，可使肌肉纤维软嫩', 'D.白糖还可防止亚硝酸盐氧化，使制品保持鲜艳的红色'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '31.【多选题】肉制品生产时添加（           ）可增强制品的弹性，改善切片性能。',
+        options: ['A.明胶', 'B.猪皮胶', 'C.海藻酸钠', 'D.琼胶'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '33.【多选题】肉腌制的主要目的有（         ）。',
+        options: ['A.提高肉制品的贮藏性', 'B.改善肉的风味、色泽', 'C.改善肉的保水性', 'D.提高产品的粘性、可塑性、整体性、结合性和坚实性等性能'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '35.【多选题】肉类腌制时常添加的腌制剂有（           ）。',
+        options: ['A.食盐', 'B.亚硝酸钠', 'C.食糖', 'D.磷酸盐'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '36.【多选题】肉腌制时添加食糖的作用（           ）。',
+        options: ['A.改善产品的滋味', 'B.有利于保藏作用', 'C.减少了蛋白质的分解腐败', 'D.增加腌腊制品颜色稳定性的作用'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '40.【多选题】低pH值的原料肉具有的特性（           ）。',
+        options: ['A.吸水性性', 'B.腌制时盐分吸收力强', 'C.色泽稳定性差', 'D.贮藏性好'],
+        answer: ['A','B','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '41.【多选题】关于肉的嫩化说法正确的是（        ）。',
+        options: ['A.嫩化可促进肌肉之间的结合', 'B.降低蒸煮损失', 'C.克服切面出现孔洞', 'D.在肉的表面切开许多15 mm左右深的刀痕'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '43.【多选题】培根生产时常采用的腌制方法有（        ）。',
+        options: ['A.干腌法', 'B.湿腌法', 'C.先干腌后湿腌的混合腌法', 'D.盐水注射腌制'],
+        answer: ['B','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '44.【多选题】天然肠衣的特点有（       ）,数量有限。',
+        options: ['A.弹性好', 'B.保水性强', 'C.可食用', 'D.规格和形状不整齐'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '47.【多选题】关于纤维素肠衣说法正确的是（       ）。',
+        options: ['A.可作大、小红肠包装之用', 'B.不能食用', 'C.不能熏烤', 'D.不能随肉馅收缩'],
+        answer: ['A','B','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '49.【多选题】火腿肠切片表面不光滑、疏松、对折性差的主要原因是（       ）。',
+        options: ['A.没进行腌制', 'B.淀粉和水的添加比例不当', 'C.淀粉和肥肉的添加比例不当', 'D.灌制不紧实'],
+        answer: ['B','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '50.【多选题】生产香肠时日晒或烘烤的目的是（      ）。',
+        options: ['A.快速排出肠内水分', 'B.熟制', 'C.产生风味', 'D.促进发色'],
+        answer: ['A','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '17.【多选题】微波干燥的特点有（      ）。',
+        options: ['A.表面不易焦糊', 'B.设备投资费用较高', 'C.干肉制品的特征性风味不明显', 'D.干肉制品的色泽不明显'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '19.【多选题】太仓肉松生产初煮时一般添加的辅料有（      ）等。',
+        options: ['A.桂皮', 'B.花椒', 'C.八角', 'D.小茴香'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '20.【多选题】太仓肉松生产复煮时一般添加的辅料有（      ）等。',
+        options: ['A.酱油', 'B.白酒', 'C.白糖', 'D.精盐'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '21.【多选题】肉干常规的脱水方法有（      ）。',
+        options: ['A.烘烤法', 'B.炒干法', 'C.油炸法', 'D.减压干燥法'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '22.【多选题】肉脯的传统加工工艺生产时烧烤的主要目的是（      ）。',
+        options: ['A.熟制', 'B.脱水', 'C.上色', 'D.使表面油润'],
+        answer: ['C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '23.【多选题】采用传统工艺加工肉脯时，存在着（      ）等问题。',
+        options: ['A.切片困难', 'B.摊筛困难', 'C.难以利用小块肉和小畜禽及鱼肉', 'D.无法进行机械化生产'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '24.【多选题】采用新工艺加工肉脯时，影响成品质量和口感的主要因素有（      ）。',
+        options: ['A.肉糜的粗细程度', 'B.肉糜的涂抹厚度', 'C.腌制时间', 'D.腌制温度'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '26.【多选题】基本调味是指在加工原料整理之后，经过加（      ）进行腌制，奠定产品的咸味。',
+        options: ['A.酱油', 'B.精盐', 'C.亚硝酸盐', 'D.香辛料'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '27.【多选题】定性调味是指原料下锅后，随同加入主要配料如（      ）等，加热煮制或红烧，决定产品的口味',
+        options: ['A.酱油', 'B.精盐', 'C.酒', 'D.香辛料'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '31.【多选题】道口烧鸡生产时紧皮的主要目的是（      ）。',
+        options: ['A.浸出残留血水', 'B.固定鸡型', 'C.便于上色', 'D.便于油炸'],
+        answer: ['A','B'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '33.【多选题】烧鸡生产时油炸的主要目的是（      ）。',
+        options: ['A.上色', 'B.熟制', 'C.产生脆皮', 'D.赋予制品油炸香气'],
+        answer: ['A','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '34.【多选题】熏烤肉制品烟熏时对肉制品起呈色作用的烟气成分有（      ）。',
+        options: ['A.酚类', 'B.醇类', 'C.有机酸', 'D.羰基化合物'],
+        answer: ['A','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '35.【多选题】熏烤肉制品烟熏时对肉制品起防腐作用的烟气成分有（      ）。',
+        options: ['A.酚类', 'B.醇类', 'C.有机酸', 'D.羰基化合物'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '37.【多选题】培根一般可采用的熏制方法有（      ）。',
+        options: ['A.冷熏法', 'B.中温法', 'C.高温法', 'D.焙熏法'],
+        answer: ['A','B','C'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'multi',
+        question: '38.【多选题】烘烤机加工主要参数有温度、露点、风机转速、加工时间，这些参数的大小会对肉制品的（      ）产生影响。',
+        options: ['A.中心温度', 'B.颜色变化', 'C.含水量', 'D.出品率'],
+        answer: ['A','B','C','D'],
+        explanation: '详见教材'
+    },
+    // 判断题
+    {
+        type: 'judge',
+        question: '56.【判断题】一般将屠宰后45min内背最长肌pH值高于5.8的猪肉定为PSE肉。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '57.【判断题】肉和肉制品中严重的酸败问题不是由微生物所引起，而是因空气中的氧，在光线、温度以及金属离子催化下进行氧化的结果。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '58.【判断题】肉的变质时的变化主要是碳水化合物和蛋白质的分解过程。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '60.【判断题】肌原纤维中的蛋白质与肉的某些重要品质特性(如嫩度)密切相关。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '62.【判断题】非蛋白态含氮化合物主要包括各种嘌呤碱基、游离氨基酸、核苷、胆碱、尿素、氮等，其含量随屠宰后肉的成熟而增加。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '63.【判断题】肉中脂溶性维生素含量较丰富，水溶性B族维生素含量较少。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '65.【判断题】蛋白质是肉中含量最多的组成成分。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '68.【判断题】热加工可以提高肉的嫩度。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '36.【判断题】肉类罐头杀菌后一般应采用加压冷却，使杀菌器内的压力稍大于罐内压力，防止造成罐头膨胀破裂。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '37.【判断题】提取蛋白胨时，消化结束后，进行双缩脲反应，如果反应呈红色，说明消化已经完全。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '38.【判断题】生产明胶时每次熬胶时间越长，胶质越纯，产量越多。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '41.【判断题】调理食品成型机的核心技术包括模具设计制造技术、成型工艺控制技术、自动化控制技术等。其中，成型工艺控制技术是决定成型机性能和产品质量的关键因素之一。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '52.【判断题】大多肉制品厂都以冷却肉作为原料。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '56.【判断题】冻肉品质的变化与肉的状态、冻结工艺无关，与冻藏条件有密切的关系。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '58.【判断题】pH值低于5.3时，适合于加工熟火腿。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '59.【判断题】金属模具火腿多用水煮办法加热，充入肠衣内的火腿多在全自动烟熏室内完成熟制。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '62.【判断题】原料肉的pH影响蒸煮火腿成品的切片性和出品率',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '63.【判断题】熏煮火腿的熟制和热杀菌过程，一般采用低温巴氏杀菌法，即火腿中心温度达到68~72℃即可。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '64.【判断题】生产灌肠腌制时肥瘦肉可以一起腌制。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '41.【判断题】肉干采用传统加工工艺生产时初煮的主要目的是为了使产品入味。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '43.【判断题】采用新工艺加工肉脯时，在烘烤前用50%的全鸡蛋液涂抹肉脯表面，在烧烤前进行压平效果较好。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '44.【判断题】酱卤煮制品的生产关键环节有调味与煮制。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '47.【判断题】烤鸡烤制和上色一般用远红外线电烤炉，不用预先将炉温升高，直接将鸡挂入炉内进行烤制。',
+        options: ['正确', '错误'],
+        answer: ['错误'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '48.【判断题】烤鸡在180℃烤制的目的是为了完成熟制，再在220~240℃的情况下烤制是为了上色。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '49.【判断题】油炸烘烤肉制品生产时烘烤温度主要影响产品的表面温度、影响产品颜色。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    },
+    {
+        type: 'judge',
+        question: '50.【判断题】油炸肉制品生产时露点温度影响产品的中心温度、影响产品熟化。',
+        options: ['正确', '错误'],
+        answer: ['正确'],
+        explanation: '详见教材'
+    }
+];
+
+let current = 0;
+let score = 0;
+let mode = 'ordered'; // ordered, random, wrongbook
+let quizList = questions.slice(); // 当前答题顺序
+let wrongQuestions = [];
+
+function shuffle(arr) {
+    let a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function startOrdered() {
+    mode = 'ordered';
+    quizList = questions.slice();
+    current = 0;
+    score = 0;
+    renderQuestion();
+    renderWrongBook();
+}
+
+function startRandom() {
+    mode = 'random';
+    quizList = shuffle(questions);
+    current = 0;
+    score = 0;
+    renderQuestion();
+    renderWrongBook();
+}
+
+function startWrongBook() {
+    mode = 'wrongbook';
+    if (wrongQuestions.length === 0) {
+        document.getElementById('quiz-area').innerHTML = '<p>暂无错题！</p>';
+        document.getElementById('score').innerHTML = '';
+        return;
+    }
+    quizList = wrongQuestions.slice();
+    current = 0;
+    score = 0;
+    renderQuestion();
+    renderWrongBook();
+}
+
+function renderWrongBook() {
+    const area = document.getElementById('wrongbook-area');
+    if (wrongQuestions.length === 0) {
+        area.innerHTML = '<b>错题册：</b> 暂无错题';
+        return;
+    }
+    let html = '<b>错题册：</b><ol>';
+    wrongQuestions.forEach((q, idx) => {
+        html += `<li>${q.question.replace(/^[0-9]+[.、．]/, '')}</li>`;
+    });
+    html += '</ol>';
+    area.innerHTML = html;
+}
+
+function renderQuestion() {
+    const quizArea = document.getElementById('quiz-area');
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '';
+    if (current >= quizList.length) {
+        quizArea.innerHTML = `<h2>答题结束！</h2><p>总得分：${score}/${quizList.length}</p>`;
+        document.getElementById('score').innerHTML = '';
+        return;
+    }
+    const q = quizList[current];
+    let html = `<div class="question"><h3>${q.question}</h3>`;
+    if (q.type === 'single') {
+        q.options.forEach((opt, idx) => {
+            html += `<div class="option"><input type="radio" name="option" value="${String.fromCharCode(65+idx)}" id="opt${idx}" onclick="submitAnswer()"><label for="opt${idx}">${opt}</label></div>`;
+        });
+    } else if (q.type === 'multi') {
+        q.options.forEach((opt, idx) => {
+            html += `<div class="option"><input type="checkbox" name="option" value="${String.fromCharCode(65+idx)}" id="opt${idx}"><label for="opt${idx}">${opt}</label></div>`;
+        });
+        html += `<button onclick="submitAnswer()">提交</button>`;
+    } else if (q.type === 'judge') {
+        html += `<div class="option"><input type="radio" name="option" value="正确" id="opt1" onclick="submitAnswer()"><label for="opt1">正确</label></div>`;
+        html += `<div class="option"><input type="radio" name="option" value="错误" id="opt2" onclick="submitAnswer()"><label for="opt2">错误</label></div>`;
+    }
+    html += `<div class="explanation" id="explanation" style="display:none;"></div>`;
+    html += `</div>`;
+    quizArea.innerHTML = html;
+}
+
+function submitAnswer() {
+    const q = quizList[current];
+    let userAnswer = [];
+    if (q.type === 'single' || q.type === 'judge') {
+        const checked = document.querySelector('input[name="option"]:checked');
+        if (checked) userAnswer = [checked.value];
+    } else if (q.type === 'multi') {
+        userAnswer = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(i=>i.value);
+        userAnswer.sort();
+    }
+    let correct = false;
+    if (q.type === 'multi') {
+        const ans = [...q.answer].sort();
+        correct = userAnswer.length === ans.length && userAnswer.every((v,i)=>v===ans[i]);
+    } else {
+        correct = userAnswer.length === 1 && userAnswer[0] === q.answer[0];
+    }
+    if (correct) {
+        score++;
+        current++;
+        renderQuestion();
+    } else {
+        // 错题册功能：只存一次
+        if (!wrongQuestions.includes(q)) {
+            wrongQuestions.push(q);
+            renderWrongBook();
+        }
+        // 弹窗显示正确答案和解析
+        let ansText = '';
+        if (q.type === 'judge') {
+            ansText = q.answer[0];
+        } else {
+            ansText = q.answer.map(a=>q.options[a.charCodeAt(0)-65]).join('，');
+        }
+        alert(`答错了！\n正确答案：${ansText}\n解析：${q.explanation||''}`);
+        // 显示解析
+        document.getElementById('explanation').style.display = 'block';
+        document.getElementById('explanation').innerText = `解析：${q.explanation}`;
+    }
+}
+
+function autoSubmitMulti() {
+    const q = quizList[current];
+    const checked = Array.from(document.querySelectorAll('input[name="option"]:checked')).map(i=>i.value);
+    // 只在选项数等于答案数时自动提交
+    if (checked.length === q.answer.length) {
+        // 检查是否有多选
+        let allValid = checked.every(v => q.answer.includes(v));
+        if (allValid) {
+            submitAnswer();
+        }
+    }
+}
+
+// 默认顺序模式
+startOrdered();
+    </script>
+</body>
+</html>    
